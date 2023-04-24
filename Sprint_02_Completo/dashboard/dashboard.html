@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>GrapeTech | Dashboard</title>
+    <!-- LINKANDO TODO O CHART JS PRO GRAFICO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script src="http://www.chartjs.org/dist/2.7.1/Chart.js"></script>
+    <script src="http://www.chartjs.org/samples/latest/utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- CHAMANDO EXTERNAMENTE NA PASTA (CSS) -->
+    <link rel="stylesheet" href="../css/dashboard.css" />
+    <!-- COLOCANDO ICON -->
+    <link rel="icon" href="../img/logo.png">
+
+</head>
+<body>
+
+    <!-- MURAL ESQUERDO INICIO-->
+    <div class="allDiv">
+        <div class="header-left">
+            <h1>GRAPETECH</h1>
+            <div class="hello">
+                <h3>Olá, <span>Bem - Vindo!</span>!</h3>
+            </div>
+            
+            <div class="btn-nav-select">
+                <h3>Gráficos</h3>
+            </div>
+
+            <div class="btn-logout"onclick="limparSessao()">
+            <h3>Sair</h3>
+            </div>
+        </div>
+        <!-- MURAL ESQUERDO FIM-->
+    
+
+    <!-- CARDS SENSORES INICIO -->
+    <!-- CARD TEMPERATURA -->
+    <div class="sensores">
+        <div class="tituloFora">
+            <h1 class="titulo">TEMPERATURA</h1>
+        </div>
+        <div class="cards">
+
+            <div class="mini_card">
+                <div class="min">LIMITE MIN</div>
+                <p>16°C-</p>
+            </div>
+
+            <div class="mini_card">
+                <div class="alerta">ALERTA</div>
+                <p>17°C</p>
+            </div>
+
+            <div class="mini_card">
+                <div class="media">MÉDIA</div>
+                <p>18°C</p>
+            </div>
+
+            <div class="mini_card">
+                <div class="alerta">ALERTA</div>
+                <p>22°C a 24°C</p>
+            </div>
+
+            <div class="mini_card">
+                <div class="min">LIMITE MAX</div>
+                <p>25°C+</p>
+            </div>
+    </div>
+
+    <!-- CARD UMIDADE -->
+    <div class="sensores">
+        <div class="tituloFora">
+            <h1 class="titulo">UMIDADE</h1>
+        </div>
+        
+        <div class="cards">
+
+        <div class="mini_card">
+            <div class="min">LIMITE MIN</div>
+            <p>50-</p>
+        </div>
+
+        <div class="mini_card">
+            <div class="alerta">ALERTA</div>
+            <p>60</p>
+        </div>
+
+        <div class="mini_card">
+            <div class="media">MÉDIA</div>
+            <p>70</p>
+        </div>
+
+        <div class="mini_card">
+            <div class="alerta">ALERTA</div>
+            <p>80</p>
+        </div>
+
+        <div class="mini_card">
+            <div class="min">LIMITE MAX</div>
+            <p>90+</p>
+        </div>
+    </div>
+    <!-- CARD SENSORES FIM -->
+
+    <!-- SENSORES INICIO -->
+    <div class="tituloFora">
+        <div class="titulo">
+            <h1>SENSORES</h1>
+        </div>
+    </div>
+        <div class="boxSensor">
+                <div class="boxGraficos"> <!-- SENSOR DHT 11 INICIO -->
+                    <h1 class="boxTitulo">Sensor DHT 11 - Umidade</h1>
+                    <section>
+                        <canvas id="dht11UmiTemp"></canvas>
+                    </section>
+                </div>  <!-- SENSOR DHT 11 FIM -->
+
+                <div class="boxGraficos"> <!-- SENSOR LM 35 INICIO -->
+                    <h1 class="boxTitulo">Sensor LM 35 - Temperatura</h1>
+                    <section>
+                        <canvas id="lm35Temperatura"></canvas>
+                    </section>
+                </div> <!-- SENSOR LM 35 FIM -->
+            </div>
+        </div>
+    </div>
+    <!-- SENSORES FIM -->
+</body>
+</html>
+
+<script>
+
+    /* -- dht11Umidade -- */
+    const tabel2 = document.getElementById('dht11UmiTemp');
+    new Chart(tabel2, {
+        type: 'bar',
+        data: {
+            labels: ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00'],
+            datasets: [
+                {
+                    label: 'Umidade',
+                    data: [],
+                    backgroundColor: 'rgb(64,160,245)',
+                    data: [90, 89, 93, 87, 88, 82],
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // LM - 35 TEMPERATURA 
+    const tabel1 = document.getElementById('lm35Temperatura');
+    new Chart(tabel1, {
+        type: 'line',
+        data: {
+            labels: ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00'],
+            datasets: [
+                {
+                    label: 'Temperatura',
+                    backgroundColor: 'rgb(245,99,99)',
+                    data: [18, 16, 16, 15, 19, 20],
+                    borderWidth: 2,
+                    borderColor: 'rgb(245,99,99)'
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    var paginacao = {};
+    var tempo = {};
+    function obterDados(grafico, endpoint) {
+        var http = new XMLHttpRequest();
+        http.open('GET', 'http://localhost:3000/sensores/' + endpoint, false);
+        http.send(null);
+        var valores = JSON.parse(http.responseText);
+        if (paginacao[endpoint] == null) {
+            paginacao[endpoint] = 0;
+        }
+        if (tempo[endpoint] == null) {
+            tempo[endpoint] = 0;
+        }
+        // Exibir à partir do último elemento exibido anteriormente
+        var ultimaPaginacao = paginacao[endpoint];
+        paginacao[endpoint] = valores.length;
+        var valores = valores.slice(ultimaPaginacao);
+        valores.forEach((valor) => {
+            //Máximo de 60 itens exibidos no gráfico
+            if (grafico.data.labels.length == 10 && grafico.data.datasets[0].data.length == 10) {
+                grafico.data.labels.shift();
+                grafico.data.datasets[0].data.shift();
+            }
+
+            grafico.data.labels.push(tempo[endpoint]++);
+            grafico.data.datasets[0].data.push(parseFloat(valor));
+            grafico.update();
+        })
+    }
+
+    setInterval(() => {
+        obterDados(dht11Umidade, 'dht11/umidade');
+        obterDados(dht11Temperatura, 'dht11/temperatura');
+        obterDados(luminosidade, 'luminosidade');
+        obterDados(lm35Temperatura, 'lm35/temperatura');
+        obterDados(chave, 'chave');
+    }, 1000);
+
+    function limparSessao() {
+        window.location.href="../html/login.html"
+    }
+</script>
